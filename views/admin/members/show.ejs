@@ -1,0 +1,519 @@
+<%# ── Header ──────────────────────────────────────────────────────────────── %>
+<div class="show-header">
+  <div class="show-avatar" style="background:<%= member.avatar_color %>">
+    <%= member.name.charAt(0).toUpperCase() %>
+  </div>
+  <div class="show-identity">
+    <h1><%= member.name %></h1>
+    <span class="role-badge"><%= member.role %></span>
+  </div>
+  <div class="show-actions">
+    <a href="<%= route('admin.members.edit', { id: member.id }) %>" class="btn btn-secondary">
+      <i class="bi bi-pencil"></i> Edit
+    </a>
+    <a href="<%= route('admin.members.index') %>" class="btn btn-ghost">
+      <i class="bi bi-arrow-left"></i> Back
+    </a>
+  </div>
+</div>
+
+<%# ── Period switcher ─────────────────────────────────────────────────────── %>
+<div style="position:relative">
+  <div class="period-switcher">
+    <span class="period-label">Showing last:</span>
+    <% [7, 30, 90].forEach(d => { %>
+      <a href="?days=<%= d %>" class="period-btn <%= days == d && !customRange ? 'active' : '' %>">
+        <%= d %> days
+      </a>
+    <% }) %>
+    <a href="?days=365" class="period-btn <%= days == 365 && !customRange ? 'active' : '' %>">
+      1 year
+    </a>
+    <button type="button" class="period-btn cal-toggle <%= customRange ? 'active' : '' %>"
+            onclick="toggleCal()">
+      <i class="bi bi-calendar3"></i>
+      <% if (customRange) { %>
+        <%= new Date(from).toLocaleDateString('en-US',{month:'short',day:'numeric'}) %>
+        —
+        <%= new Date(to).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) %>
+      <% } else { %>
+        Custom range
+      <% } %>
+    </button>
+    <% if (customRange) { %>
+      <a href="?days=30" class="period-btn" style="color:#e74c3c" title="Clear custom range">
+        <i class="bi bi-x"></i>
+      </a>
+    <% } %>
+  </div>
+</div>
+
+<%# ── Metric cards ────────────────────────────────────────────────────────── %>
+<div class="metrics-grid">
+  <div class="metric-card">
+    <div class="metric-icon" style="background:#eef2ff;color:#5b4fcf">
+      <i class="bi bi-star-fill"></i>
+    </div>
+    <div class="metric-value"><%= metrics.currentBalance %></div>
+    <div class="metric-label">Current Balance</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-icon" style="background:#d4edda;color:#27ae60">
+      <i class="bi bi-arrow-up-circle-fill"></i>
+    </div>
+    <div class="metric-value">+<%= metrics.pointsEarned %></div>
+    <div class="metric-label">Points Earned</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-icon" style="background:#fde8e6;color:#e74c3c">
+      <i class="bi bi-arrow-down-circle-fill"></i>
+    </div>
+    <div class="metric-value">-<%= metrics.pointsSpent %></div>
+    <div class="metric-label">Points Spent</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-icon" style="background:#d4edda;color:#27ae60">
+      <i class="bi bi-check-circle-fill"></i>
+    </div>
+    <div class="metric-value"><%= metrics.tasksCompleted %></div>
+    <div class="metric-label">Tasks Completed</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-icon" style="background:#fff3cd;color:#f0a500">
+      <i class="bi bi-clock-fill"></i>
+    </div>
+    <div class="metric-value"><%= metrics.tasksPending %></div>
+    <div class="metric-label">Awaiting Approval</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-icon" style="background:#fde8e6;color:#e74c3c">
+      <i class="bi bi-x-circle-fill"></i>
+    </div>
+    <div class="metric-value"><%= metrics.tasksRejected %></div>
+    <div class="metric-label">Tasks Rejected</div>
+  </div>
+</div>
+
+<%# ── Points chart ────────────────────────────────────────────────────────── %>
+<div class="show-card">
+  <h3><i class="bi bi-graph-up"></i> Points Over Time</h3>
+  <% if (JSON.parse(pointsChart).length === 0) { %>
+    <p class="empty-state">No points activity in this period.</p>
+  <% } else { %>
+    <canvas id="points-chart" height="80"></canvas>
+  <% } %>
+</div>
+
+<%# ── Activity tabs ───────────────────────────────────────────────────────── %>
+<div class="show-card">
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="showTab('tasks')">
+      <i class="bi bi-list-check"></i> Tasks
+      <span class="tab-count"><%= completions.length %></span>
+    </button>
+    <button class="tab-btn" onclick="showTab('points')">
+      <i class="bi bi-star"></i> Points
+      <span class="tab-count"><%= ledger.length %></span>
+    </button>
+    <button class="tab-btn" onclick="showTab('redemptions')">
+      <i class="bi bi-gift"></i> Redemptions
+      <span class="tab-count"><%= redemptions.length %></span>
+    </button>
+  </div>
+
+  <%# Tasks tab %>
+  <div id="tab-tasks" class="tab-content active">
+    <% if (completions.length === 0) { %>
+      <p class="empty-state">No tasks submitted in this period.</p>
+    <% } else { %>
+      <table class="activity-table">
+        <thead>
+          <tr>
+            <th>Task</th>
+            <th>Status</th>
+            <th>Points</th>
+            <th>Submitted</th>
+            <th>Approved By</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% completions.forEach(c => { %>
+            <tr>
+              <td><%= c.task_title %></td>
+              <td><span class="status-badge status-<%= c.status %>"><%= c.status %></span></td>
+              <td>
+                <% if (c.status === 'approved') { %>
+                  <span style="color:#27ae60;font-weight:700">+<%= c.points_awarded || c.task_points %></span>
+                <% } else { %>
+                  <span style="color:#aaa"><%= c.task_points %></span>
+                <% } %>
+              </td>
+              <td class="text-muted"><%= new Date(c.completed_at).toLocaleDateString() %></td>
+              <td class="text-muted"><%= c.approved_by_name || '—' %></td>
+            </tr>
+            <% if (c.rejection_reason) { %>
+              <tr class="rejection-row">
+                <td colspan="5">
+                  <i class="bi bi-chat-left-text"></i>
+                  <em><%= c.rejection_reason %></em>
+                </td>
+              </tr>
+            <% } %>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </div>
+
+  <%# Points tab %>
+  <div id="tab-points" class="tab-content" style="display:none">
+    <% if (ledger.length === 0) { %>
+      <p class="empty-state">No points activity in this period.</p>
+    <% } else { %>
+      <table class="activity-table">
+        <thead>
+          <tr>
+            <th>Reason</th>
+            <th>Type</th>
+            <th>Points</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% ledger.forEach(l => { %>
+            <tr>
+              <td><%= l.reason %></td>
+              <td><span class="type-badge type-<%= l.type %>"><%= l.type %></span></td>
+              <td>
+                <span style="color:<%= l.points > 0 ? '#27ae60' : '#e74c3c' %>;font-weight:700">
+                  <%= l.points > 0 ? '+' : '' %><%= l.points %>
+                </span>
+              </td>
+              <td class="text-muted"><%= new Date(l.created_at).toLocaleDateString() %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </div>
+
+  <%# Redemptions tab %>
+  <div id="tab-redemptions" class="tab-content" style="display:none">
+    <% if (redemptions.length === 0) { %>
+      <p class="empty-state">No redemptions in this period.</p>
+    <% } else { %>
+      <table class="activity-table">
+        <thead>
+          <tr>
+            <th>Reward</th>
+            <th>Status</th>
+            <th>Points</th>
+            <th>Requested</th>
+            <th>Fulfilled</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% redemptions.forEach(r => { %>
+            <tr>
+              <td><%= r.reward_title %></td>
+              <td><span class="status-badge status-<%= r.status %>"><%= r.status %></span></td>
+              <td style="color:#e74c3c;font-weight:700">-<%= r.points_spent %></td>
+              <td class="text-muted"><%= new Date(r.redeemed_at).toLocaleDateString() %></td>
+              <td class="text-muted">
+                <%= r.fulfilled_at ? new Date(r.fulfilled_at).toLocaleDateString() : '—' %>
+              </td>
+            </tr>
+            <% if (r.rejection_reason) { %>
+              <tr class="rejection-row">
+                <td colspan="5">
+                  <i class="bi bi-chat-left-text"></i>
+                  <em><%= r.rejection_reason %></em>
+                </td>
+              </tr>
+            <% } %>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </div>
+</div>
+
+<style>
+/* ── Layout ────────────────────────────────────────────────────────────────── */
+.show-header      { display:flex; align-items:center; gap:1.2rem; margin-bottom:1.5rem; flex-wrap:wrap; }
+.show-avatar      { width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:1.8rem; font-weight:800; flex-shrink:0; }
+.show-identity    { flex:1; }
+.show-identity h1 { margin:0 0 0.2rem; font-size:1.6rem; color:#1e1b4b; }
+.show-actions     { display:flex; gap:0.5rem; }
+.role-badge       { background:#eef2ff; color:#5b4fcf; padding:0.2rem 0.7rem; border-radius:999px; font-size:0.78rem; font-weight:600; text-transform:capitalize; }
+
+/* ── Period switcher ───────────────────────────────────────────────────────── */
+.period-switcher  { display:flex; align-items:center; gap:0.5rem; margin-bottom:1.5rem; flex-wrap:wrap; }
+.period-label     { font-size:0.85rem; color:#888; margin-right:0.25rem; }
+.period-btn       { padding:0.3rem 0.8rem; border-radius:999px; border:2px solid #e5e7eb; background:white; font-size:0.82rem; font-weight:600; color:#888; cursor:pointer; text-decoration:none; transition:all 0.15s; }
+.period-btn:hover { border-color:#5b4fcf; color:#5b4fcf; }
+.period-btn.active { background:#5b4fcf; border-color:#5b4fcf; color:white; }
+
+/* ── Metric cards ──────────────────────────────────────────────────────────── */
+.metrics-grid     { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:1rem; margin-bottom:1.5rem; }
+.metric-card      { background:white; border-radius:14px; padding:1.2rem 1rem; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.06); }
+.metric-icon      { width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.1rem; margin:0 auto 0.6rem; }
+.metric-value     { font-size:1.6rem; font-weight:800; color:#1e1b4b; line-height:1; }
+.metric-label     { font-size:0.75rem; color:#888; margin-top:0.25rem; }
+
+/* ── Cards ─────────────────────────────────────────────────────────────────── */
+.show-card        { background:white; border-radius:16px; padding:1.5rem; margin-bottom:1.5rem; box-shadow:0 2px 8px rgba(0,0,0,0.06); }
+.show-card h3     { margin:0 0 1.2rem; color:#1e1b4b; font-size:1rem; display:flex; align-items:center; gap:0.5rem; }
+
+/* ── Tabs ──────────────────────────────────────────────────────────────────── */
+.tab-bar          { display:flex; gap:0.5rem; border-bottom:2px solid #f0f0f0; margin-bottom:1.2rem; flex-wrap:wrap; }
+.tab-btn          { background:none; border:none; padding:0.6rem 1rem; font-weight:600; font-size:0.88rem; color:#888; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-2px; transition:all 0.15s; display:flex; align-items:center; gap:0.4rem; }
+.tab-btn:hover    { color:#5b4fcf; }
+.tab-btn.active   { color:#5b4fcf; border-bottom-color:#5b4fcf; }
+.tab-count        { background:#f0f0f0; border-radius:999px; padding:0.1rem 0.5rem; font-size:0.75rem; }
+.tab-btn.active .tab-count { background:#eef2ff; color:#5b4fcf; }
+
+/* ── Table ─────────────────────────────────────────────────────────────────── */
+.activity-table   { width:100%; border-collapse:collapse; font-size:0.88rem; }
+.activity-table th { text-align:left; padding:0.5rem 0.75rem; color:#888; font-weight:600; font-size:0.78rem; text-transform:uppercase; border-bottom:2px solid #f0f0f0; }
+.activity-table td { padding:0.65rem 0.75rem; border-bottom:1px solid #f7f7f7; }
+.activity-table tr:last-child td { border-bottom:none; }
+.text-muted       { color:#aaa; }
+.rejection-row td { background:#fff5f5; color:#e74c3c; font-size:0.82rem; padding:0.4rem 0.75rem; }
+
+/* ── Badges ────────────────────────────────────────────────────────────────── */
+.status-badge     { padding:0.2rem 0.6rem; border-radius:999px; font-size:0.75rem; font-weight:700; text-transform:capitalize; }
+.status-approved  { background:#d4edda; color:#27ae60; }
+.status-pending   { background:#fff3cd; color:#f0a500; }
+.status-rejected  { background:#fde8e6; color:#e74c3c; }
+.status-fulfilled { background:#cce5ff; color:#0066cc; }
+.type-badge       { padding:0.2rem 0.6rem; border-radius:999px; font-size:0.75rem; font-weight:700; text-transform:capitalize; background:#f0f0f0; color:#555; }
+.type-earned      { background:#d4edda; color:#27ae60; }
+.type-spent       { background:#fde8e6; color:#e74c3c; }
+.type-bonus       { background:#eef2ff; color:#5b4fcf; }
+.type-adjusted    { background:#fff3cd; color:#f0a500; }
+.type-expired     { background:#f0f0f0; color:#aaa; }
+
+.empty-state      { text-align:center; color:#aaa; padding:2rem; font-size:0.9rem; }
+
+.cal-grid       { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; }
+.cal-hdr        { font-size:0.72rem; color:#aaa; text-align:center; padding-bottom:4px; }
+.cal-day        { width:32px; height:32px; display:flex; align-items:center; justify-content:center; font-size:0.8rem; border-radius:50%; cursor:pointer; transition:background .1s; }
+.cal-day:hover  { background:#eef2ff; }
+.cal-today      { font-weight:700; color:#5b4fcf; }
+.cal-nav-btn    { background:none; border:none; font-size:1.2rem; cursor:pointer; color:#888; padding:0 6px; border-radius:6px; }
+.cal-nav-btn:hover { background:#f4f6fb; }
+.range-start    { background:#5b4fcf; color:white; border-radius:50% 0 0 50%; }
+.range-end      { background:#5b4fcf; color:white; border-radius:0 50% 50% 0; }
+.range-start.range-end { border-radius:50%; }
+.in-range       { background:#eef2ff; color:#5b4fcf; border-radius:0; }
+
+#cal-panel {
+  position: absolute;
+  z-index: 100;
+  background: white;
+  border: 0.5px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 1rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  width: fit-content;
+  margin-top: 8px;
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 30px); /* fixed width columns */
+  gap: 1px;
+}
+
+.cal-day {
+  width: 30px;
+  height: 30px;
+  font-size: 0.78rem; /* smaller text */
+}
+
+.cal-hdr {
+  font-size: 0.7rem;
+  width: 30px;
+  text-align: center;
+}
+
+#cal-panel > div:first-child {
+  display: flex;
+  gap: 1.5rem; /* tighter gap between months */
+}
+
+
+</style>
+
+<script>
+// ── Tab switching ────────────────────────────────────────────────────────────
+function showTab(name) {
+  document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById(`tab-${name}`).style.display = 'block';
+  event.currentTarget.classList.add('active');
+}
+
+// ── Points chart ─────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const canvas = document.getElementById('points-chart');
+  if (!canvas) return;
+
+  const raw    = <%- pointsChart %>;
+  const labels = raw.map(r => new Date(r.date).toLocaleDateString('en-US', { month:'short', day:'numeric' }));
+  const earned = raw.map(r => parseInt(r.earned) || 0);
+  const spent  = raw.map(r => parseInt(r.spent)  || 0);
+
+  new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label:           'Earned',
+          data:            earned,
+          backgroundColor: '#27ae6088',
+          borderColor:     '#27ae60',
+          borderWidth:     1,
+          borderRadius:    4,
+        },
+        {
+          label:           'Spent',
+          data:            spent,
+          backgroundColor: '#e74c3c88',
+          borderColor:     '#e74c3c',
+          borderWidth:     1,
+          borderRadius:    4,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'top' },
+      },
+      scales: {
+        x: { grid: { display: false } },
+        y: { beginAtZero: true, grid: { color: '#f0f0f0' } },
+      },
+    },
+  });
+});
+</script>
+
+
+
+<script>
+  const CAL_MONTHS = ['January','February','March','April','May','June',
+                    'July','August','September','October','November','December'];
+  const CAL_DAYS   = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+
+  let calFromMonth = new Date(); calFromMonth.setDate(1);
+  let calToMonth   = new Date(calFromMonth); calToMonth.setMonth(calToMonth.getMonth() + 1);
+  let rangeStart   = null;
+  let rangeEnd     = null;
+  let calSelecting = 0; // 0=idle, 1=waiting for end
+
+  function toggleCal() {
+    const panel = document.getElementById('cal-panel');
+    const open  = panel.style.display === 'none';
+    panel.style.display = open ? 'block' : 'none';
+    if (open) _renderBothMonths();
+  }
+
+  function _renderBothMonths() {
+    _renderMonth('cal-from', calFromMonth);
+    _renderMonth('cal-to',   calToMonth);
+  }
+
+  function _renderMonth(containerId, monthDate) {
+    const el    = document.getElementById(containerId);
+    if (!el) return;
+    const y     = monthDate.getFullYear();
+    const m     = monthDate.getMonth();
+    const first = new Date(y, m, 1).getDay();
+    const total = new Date(y, m + 1, 0).getDate();
+    const today = new Date().toDateString();
+
+    let html = `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <button type="button" class="cal-nav-btn" onclick="calShift('${containerId}',-1)">&#8249;</button>
+        <span style="font-size:0.85rem;font-weight:600">${CAL_MONTHS[m]} ${y}</span>
+        <button type="button" class="cal-nav-btn" onclick="calShift('${containerId}',1)">&#8250;</button>
+      </div>
+      <div class="cal-grid">
+    `;
+
+    CAL_DAYS.forEach(d => html += `<div class="cal-hdr">${d}</div>`);
+    for (let i = 0; i < first; i++) html += `<div></div>`;
+
+    for (let d = 1; d <= total; d++) {
+      const date = new Date(y, m, d);
+      const ts   = date.toDateString();
+      const isToday  = ts === today;
+      const isStart  = rangeStart && rangeStart.toDateString() === ts;
+      const isEnd    = rangeEnd   && rangeEnd.toDateString()   === ts;
+      const inRange  = rangeStart && rangeEnd && date > rangeStart && date < rangeEnd;
+
+      let cls = 'cal-day';
+      if (isStart && isEnd) cls += ' range-start range-end';
+      else if (isStart)     cls += ' range-start';
+      else if (isEnd)       cls += ' range-end';
+      else if (inRange)     cls += ' in-range';
+      if (isToday)          cls += ' cal-today';
+
+      html += `<div class="${cls}" onclick="calPick('${date.toISOString()}')">${d}</div>`;
+    }
+
+    html += `</div>`;
+    el.innerHTML = html;
+  }
+
+  function calShift(containerId, dir) {
+    if (containerId === 'cal-from') calFromMonth.setMonth(calFromMonth.getMonth() + dir);
+    else                            calToMonth.setMonth(calToMonth.getMonth() + dir);
+    _renderBothMonths();
+  }
+
+  function calPick(iso) {
+    const date = new Date(iso);
+    if (calSelecting === 0 || calSelecting === 2) {
+      rangeStart   = date;
+      rangeEnd     = null;
+      calSelecting = 1;
+      document.getElementById('range-label').textContent = 'Now select an end date';
+    } else {
+      if (date < rangeStart) { rangeEnd = rangeStart; rangeStart = date; }
+      else                   { rangeEnd = date; }
+      calSelecting = 2;
+      const days = Math.round((rangeEnd - rangeStart) / 86400000);
+      document.getElementById('range-label').textContent =
+        `${_calFmt(rangeStart)} — ${_calFmt(rangeEnd)} (${days} day${days !== 1 ? 's' : ''})`;
+      const btn = document.getElementById('apply-btn');
+      btn.disabled = false;
+    }
+    _renderBothMonths();
+  }
+
+  function clearRange() {
+    rangeStart = null; rangeEnd = null; calSelecting = 0;
+    document.getElementById('range-label').textContent = 'Select start date';
+    document.getElementById('apply-btn').disabled = true;
+    _renderBothMonths();
+  }
+
+  function applyRange() {
+    if (!rangeStart || !rangeEnd) return;
+    const from = rangeStart.toISOString().split('T')[0];
+    const to   = rangeEnd.toISOString().split('T')[0];
+    window.location.href = `?from=${from}&to=${to}`;
+  }
+
+  function _calFmt(d) {
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+</script>
+
+<%# Chart.js — loaded inline only on this page %>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>

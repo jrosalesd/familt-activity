@@ -1,0 +1,82 @@
+body.admin-body { background: #f0f2f7; }
+.admin-wrapper { display: flex; min-height: 100vh; }
+
+/* ── Sidebar ─────────────────────────────────────────────────────────────── */
+.admin-sidebar { width: 230px; background: #1e1b4b; color: white; display: flex; flex-direction: column; flex-shrink: 0; }
+.sidebar-brand { padding: 1.5rem 1.2rem; font-size: 1.1rem; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.sidebar-family { padding: 0.5rem 1.2rem 0.8rem; font-size: 0.8rem; color: rgba(255,255,255,0.5); border-bottom: 1px solid rgba(255,255,255,0.1); }
+.sidebar-nav { padding: 1rem 0; flex: 1; }
+.sidebar-nav a, .sidebar-logout { display: flex; align-items: center; gap: 0.6rem; padding: 0.7rem 1.2rem; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.88rem; transition: all 0.15s; background: none; border: none; cursor: pointer; width: 100%; text-align: left; }
+.sidebar-nav a:hover, .sidebar-logout:hover { background: rgba(255,255,255,0.08); color: white; }
+.sidebar-nav a.active { background: rgba(255,255,255,0.12); color: white; border-left: 3px solid #818cf8; }
+.sidebar-nav hr { border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 0.5rem 0; }
+.sidebar-logout-form { margin: 0; }
+.sidebar-user { padding: 1rem 1.2rem; display: flex; align-items: center; gap: 0.6rem; font-size: 0.82rem; color: rgba(255,255,255,0.6); border-top: 1px solid rgba(255,255,255,0.1); }
+
+/* ── Content area ────────────────────────────────────────────────────────── */
+.admin-content { flex: 1; display: flex; flex-direction: column; }
+.admin-header { background: white; padding: 1rem 2rem; border-bottom: 1px solid #e5e7eb; }
+.admin-header h1 { font-size: 1.3rem; color: #1e1b4b; }
+.admin-main { padding: 2rem; }
+
+/* ── Stats grid ──────────────────────────────────────────────────────────── */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1.2rem; margin-bottom: 2rem; }
+.stat-card { background: white; border-radius: 10px; padding: 1.5rem; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.06); border-top: 4px solid #818cf8; }
+.stat-icon  { font-size: 1.8rem; color: #818cf8; margin-bottom: 0.3rem; }
+.stat-value { font-size: 2rem; font-weight: 800; color: #1e1b4b; }
+.stat-label { font-size: 0.82rem; color: #888; margin-top: 0.2rem; }
+
+/* ── Data table ──────────────────────────────────────────────────────────── */
+.data-table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.data-table th { background: #f5f3ff; color: #1e1b4b; text-align: left; padding: 0.8rem 1rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; }
+.data-table td { padding: 0.8rem 1rem; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; vertical-align: middle; }
+.data-table tr:last-child td { border-bottom: none; }
+
+/* ── Badges ──────────────────────────────────────────────────────────────── */
+.badge { display: inline-block; padding: 0.2rem 0.7rem; border-radius: 99px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+.badge-pending       { background: #fef3c7; color: #92400e; }
+.badge-approved      { background: #d1fae5; color: #065f46; }
+.badge-fulfilled     { background: #dbeafe; color: #1e40af; }
+.badge-rejected      { background: #fee2e2; color: #991b1b; }
+.badge-parent        { background: #ede9fe; color: #5b21b6; }
+.badge-child         { background: #fce7f3; color: #9d174d; }
+.badge-trusted-adult { background: #e0f2fe; color: #075985; }
+
+/* ── Page header ─────────────────────────────────────────────────────────── */
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+.page-header h2 { font-size: 1.2rem; color: #1e1b4b; }
+.empty-state { text-align: center; padding: 3rem; color: #aaa; font-size: 1rem; }
+.action-bar { display: flex; gap: 0.8rem; margin-top: 1.5rem; }
+
+/* ── Edit form ───────────────────────────────────────────────────────────── */
+.edit-form { background: white; border-radius: 10px; padding: 1.5rem; max-width: 600px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.edit-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: start; }
+.member-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+.member-header-role { font-size: 0.8rem; color: #888; }
+.section-title { margin-bottom: 1.2rem; color: #1e1b4b; }
+
+/* ── Points adjust ───────────────────────────────────────────────────────── */
+.points-current { text-align: center; margin-bottom: 1.2rem; }
+.points-big { display: block; font-size: 3rem; font-weight: 800; color: #f0a500; line-height: 1; }
+
+/* ── Confirm delete modal ────────────────────────────────────────────────── */
+.confirm-modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+.confirm-modal-box {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 380px;
+  width: 90%;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+.confirm-modal-title { margin-bottom: 0.5rem; color: #1e1b4b; }
+.confirm-modal-message { color: #888; margin-bottom: 1.5rem; font-size: 0.9rem; }
+.confirm-modal-actions { display: flex; gap: 1rem; justify-content: flex-end; }

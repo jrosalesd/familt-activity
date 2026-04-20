@@ -1,0 +1,185 @@
+<%# Family home — two doors: adults and kids %>
+<div class="family-home">
+
+  <div class="family-home-header">
+    <div class="family-home-avatar">
+      <i class="bi bi-house-heart-fill"></i>
+    </div>
+    <h1><%= currentFamily.name %></h1>
+    <p>Who's logging in today?</p>
+  </div>
+
+  <div class="two-doors">
+
+    <%# Adult door %>
+    <div class="door door-adult" onclick="showAdultLogin()">
+      <div class="door-icon"><i class="bi bi-shield-lock-fill"></i></div>
+      <div class="door-label">Parent / Adult</div>
+      <div class="door-hint">Email & password</div>
+    </div>
+
+    <%# Kids door %>
+    <div class="door door-kids" onclick="showKidsLogin()">
+      <div class="door-icon"><i class="bi bi-emoji-smile-fill"></i></div>
+      <div class="door-label">Kids</div>
+      <div class="door-hint">Pick your name & PIN</div>
+    </div>
+
+  </div>
+
+  <a href="/" class="back-link"><i class="bi bi-arrow-left"></i> Back</a>
+
+</div>
+
+<%# Adult login modal %>
+<div class="modal" id="adult-modal" style="display:none">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h2><i class="bi bi-shield-lock"></i> Parent / Adult Login</h2>
+      <button class="modal-close" onclick="closeModals()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <% if (flash && flash.error) { %>
+      <div class="flash flash-error"><i class="bi bi-exclamation-triangle-fill"></i> <%= flash.error %></div>
+    <% } %>
+
+    <form action="/login/password" method="POST">
+      <input type="hidden" name="family_id" value="<%= currentFamily.id %>"/>
+      <div class="form-group">
+        <label><i class="bi bi-envelope"></i> Email</label>
+        <input type="email" name="email" required autofocus/>
+      </div>
+      <div class="form-group">
+        <label><i class="bi bi-lock"></i> Password</label>
+        <input type="password" name="password" required/>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">
+        <i class="bi bi-box-arrow-in-right"></i> Login
+      </button>
+    </form>
+  </div>
+</div>
+
+<%# Kids login modal — member picker %>
+<div class="modal" id="kids-modal" style="display:none">
+  <div class="modal-card modal-card-wide">
+    <div class="modal-header">
+      <h2><i class="bi bi-emoji-smile"></i> Who are you?</h2>
+      <button class="modal-close" onclick="closeModals()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <div class="members-grid">
+      <% children.forEach(m => { %>
+        <div class="member-card" onclick="selectChild(<%= m.id %>, '<%= m.name %>')">
+          <div class="member-avatar" style="background:<%= m.avatar_color %>">
+            <%= m.name.charAt(0).toUpperCase() %>
+          </div>
+          <div class="member-name"><%= m.name %></div>
+          <div class="member-points">
+            <i class="bi bi-star-fill"></i> <%= m.points_balance %> pts
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+</div>
+
+<%# PIN pad modal %>
+<div class="modal" id="pin-modal" style="display:none">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h2>Hi <span id="pin-name"></span>! 👋</h2>
+      <button class="modal-close" onclick="backToKids()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+    <p style="text-align:center;color:var(--muted);margin-bottom:1.5rem">Enter your 4-digit PIN</p>
+
+    <div class="pin-display">
+      <span class="pin-dot" id="dot-0"></span>
+      <span class="pin-dot" id="dot-1"></span>
+      <span class="pin-dot" id="dot-2"></span>
+      <span class="pin-dot" id="dot-3"></span>
+    </div>
+
+    <div class="pin-pad">
+      <% [1,2,3,4,5,6,7,8,9].forEach(n => { %>
+        <button class="pin-btn" onclick="addPin('<%= n %>')"><%= n %></button>
+      <% }) %>
+      <button class="pin-btn pin-btn-clear" onclick="clearPin()"><i class="bi bi-arrow-left"></i></button>
+      <button class="pin-btn" onclick="addPin('0')">0</button>
+      <button class="pin-btn pin-btn-ok" onclick="submitPin()"><i class="bi bi-check-lg"></i></button>
+    </div>
+
+    <form id="pin-form" action="/login/pin" method="POST" style="display:none">
+      <input type="hidden" name="family_id"  value="<%= currentFamily.id %>"/>
+      <input type="hidden" name="member_id"  id="pin-member-id"/>
+      <input type="hidden" name="pin"        id="pin-value"/>
+    </form>
+  </div>
+</div>
+
+<style>
+/* ── Family home ──────────────────────────────────────────── */
+.family-home { max-width: 600px; margin: 3rem auto; padding: 0 1rem; text-align: center; }
+.family-home-header { margin-bottom: 2.5rem; }
+.family-home-avatar { font-size: 3.5rem; color: var(--primary); margin-bottom: 0.5rem; }
+.family-home h1 { font-size: 2rem; color: var(--primary); margin-bottom: 0.3rem; }
+.family-home p  { color: var(--muted); }
+
+/* ── Two doors ────────────────────────────────────────────── */
+.two-doors { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+.door { background: white; border-radius: 16px; padding: 2.5rem 1.5rem; cursor: pointer;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.07); transition: transform 0.2s, box-shadow 0.2s; }
+.door:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+.door-adult { border-top: 5px solid var(--primary); }
+.door-kids  { border-top: 5px solid var(--secondary); }
+.door-icon  { font-size: 3rem; margin-bottom: 0.8rem; }
+.door-adult .door-icon { color: var(--primary); }
+.door-kids  .door-icon { color: var(--secondary); }
+.door-label { font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: 0.3rem; }
+.door-hint  { font-size: 0.82rem; color: var(--muted); }
+.back-link  { color: var(--muted); font-size: 0.9rem; text-decoration: none; }
+.back-link:hover { color: var(--primary); }
+
+/* ── Modals ───────────────────────────────────────────────── */
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex;
+         align-items: center; justify-content: center; z-index: 100; padding: 1rem; }
+.modal-card { background: white; border-radius: 16px; padding: 2rem; width: 100%;
+              max-width: 360px; box-shadow: 0 8px 40px rgba(0,0,0,0.2); }
+.modal-card-wide { max-width: 560px; }
+.modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+.modal-header h2 { font-size: 1.2rem; color: var(--primary); }
+.modal-close { background: none; border: none; font-size: 1rem; color: var(--muted); cursor: pointer; }
+.modal-close:hover { color: var(--danger); }
+
+/* ── Member picker ────────────────────────────────────────── */
+.members-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 1rem; }
+.member-card  { text-align: center; cursor: pointer; padding: 1rem 0.5rem; border-radius: 12px;
+                transition: background 0.15s; }
+.member-card:hover { background: #f5f3ff; }
+.member-avatar { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center;
+                 justify-content: center; color: white; font-size: 1.5rem; font-weight: 700; margin: 0 auto 0.6rem; }
+.member-name   { font-weight: 700; font-size: 0.9rem; margin-bottom: 0.2rem; }
+.member-points { font-size: 0.78rem; color: #f0a500; font-weight: 600; }
+
+/* ── PIN pad ──────────────────────────────────────────────── */
+.pin-display { display: flex; justify-content: center; gap: 1rem; margin-bottom: 1.5rem; }
+.pin-dot     { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #ddd; transition: background 0.15s, border-color 0.15s; }
+.pin-dot.filled { background: var(--primary); border-color: var(--primary); }
+.pin-pad     { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; }
+.pin-btn     { padding: 1rem; font-size: 1.2rem; font-weight: 700; border: none; border-radius: 10px;
+               background: #f4f6fb; cursor: pointer; transition: background 0.1s; }
+.pin-btn:hover  { background: #e8e4f8; }
+.pin-btn-clear  { background: #fde8e6; color: var(--danger); }
+.pin-btn-ok     { background: #d4edda; color: var(--success); }
+
+@media(max-width:480px) {
+  .two-doors { grid-template-columns: 1fr; }
+}
+</style>
+

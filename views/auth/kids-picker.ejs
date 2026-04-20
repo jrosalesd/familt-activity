@@ -1,0 +1,100 @@
+<div class="kids-picker-page">
+  <div class="kids-picker-header">
+    <i class="bi bi-house-heart-fill"></i>
+    <h1><%= family.name %></h1>
+    <p>Who are you?</p>
+  </div>
+
+  <div class="members-grid">
+    <% children.forEach(m => { %>
+      <div class="member-card" onclick="selectChild(<%= m.id %>, '<%= m.name %>', <%= m.pin_length || 4 %>)">
+        <div class="member-avatar" style="background:<%= m.avatar_color %>">
+          <%= m.name.charAt(0).toUpperCase() %>
+        </div>
+        <div class="member-name"><%= m.name %></div>
+        <div class="member-points">
+          <i class="bi bi-star-fill"></i> <%= m.points_balance %> pts
+        </div>
+      </div>
+    <% }) %>
+  </div>
+
+  <%# PIN pad modal %>
+  <div class="modal" id="pin-modal" style="display:none">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Hi <span id="pin-name"></span>! 👋</h2>
+        <button type="button" class="modal-close" onclick="closePin()">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <p style="text-align:center;color:#888;margin-bottom:1.5rem">
+        Enter your PIN
+      </p>
+
+      <%# Dots are built dynamically by selectChild() %>
+      <div class="pin-display" id="pin-display"></div>
+
+      <div class="pin-pad">
+        <% [1,2,3,4,5,6,7,8,9].forEach(n => { %>
+          <button type="button" class="pin-btn" onclick="addPin('<%= n %>')"><%= n %></button>
+        <% }) %>
+        <button type="button" class="pin-btn pin-btn-clear" onclick="clearPin()">
+          <i class="bi bi-arrow-left"></i>
+        </button>
+        <button type="button" class="pin-btn" onclick="addPin('0')">0</button>
+        <button type="button" class="pin-btn pin-btn-ok" onclick="submitPin()">
+          <i class="bi bi-check-lg"></i>
+        </button>
+      </div>
+
+      <p style="text-align:center;font-size:0.8rem;color:#aaa;margin-top:1rem">
+        <i class="bi bi-keyboard"></i> You can also use your keyboard
+      </p>
+
+      <form id="pin-form" action="/login/pin" method="POST" style="display:none">
+        <%- csrf() %>
+        <input type="hidden" name="family_id" value="<%= family.id %>"/>
+        <input type="hidden" name="member_id" id="pin-member-id"/>
+        <input type="hidden" name="pin"       id="pin-value"/>
+      </form>
+    </div>
+  </div>
+
+  <p style="text-align:center;margin-top:2rem">
+    <a href="/login/kids" class="btn btn-secondary">
+      <i class="bi bi-arrow-left"></i> Back
+    </a>
+  </p>
+</div>
+
+<style>
+.kids-picker-page   { max-width: 560px; margin: 0 auto; padding: 3rem 1rem; text-align: center; }
+.kids-picker-header { margin-bottom: 2rem; }
+.kids-picker-header i  { font-size: 3rem; color: #5b4fcf; display: block; margin-bottom: 0.5rem; }
+.kids-picker-header h1 { font-size: 2rem; color: #1e1b4b; margin: 0 0 0.2rem; }
+.kids-picker-header p  { color: #888; margin: 0; }
+.members-grid      { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; margin: 1.5rem 0; }
+.member-card       { background: white; border-radius: 14px; padding: 1.2rem 0.8rem; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; box-shadow: 0 2px 8px rgba(0,0,0,0.07); min-width: 110px; }
+.member-card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.12); }
+.member-avatar     { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; font-weight: 700; margin: 0 auto 0.6rem; }
+.member-name       { font-weight: 700; font-size: 0.9rem; margin-bottom: 0.2rem; color: #1e1b4b; }
+.member-points     { font-size: 0.78rem; color: #f0a500; font-weight: 600; }
+.modal             { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 1rem; }
+.modal-card        { background: white; border-radius: 16px; padding: 2rem; width: 100%; max-width: 320px; }
+.modal-header      { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+.modal-header h2   { font-size: 1.2rem; color: #1e1b4b; margin: 0; }
+.modal-close       { background: none; border: none; font-size: 1rem; color: #888; cursor: pointer; padding: 0.2rem; }
+.pin-display       { display: flex; justify-content: center; gap: 0.8rem; margin-bottom: 1.5rem; min-height: 24px; }
+.pin-dot           { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #ddd; background: white; transition: all 0.15s; flex-shrink: 0; }
+.pin-dot.filled    { background: #5b4fcf; border-color: #5b4fcf; }
+.pin-pad           { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; }
+.pin-btn           { padding: 1rem; font-size: 1.2rem; font-weight: 700; border: none; border-radius: 10px; background: #f4f6fb; cursor: pointer; transition: background 0.1s; }
+.pin-btn:hover     { background: #e8e4f8; }
+.pin-btn:active    { background: #d8d4f0; transform: scale(0.96); }
+.pin-btn-clear     { background: #fde8e6; color: #e74c3c; }
+.pin-btn-ok        { background: #d4edda; color: #27ae60; }
+</style>
+
+

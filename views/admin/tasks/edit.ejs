@@ -1,0 +1,133 @@
+<div class="page-header">
+  <h2><i class="bi bi-pencil"></i> Edit Task</h2>
+  <a href="<%= route('admin.tasks.index') %>" class="btn btn-secondary">
+    <i class="bi bi-arrow-left"></i> Back
+  </a>
+</div>
+
+<% const assignedIds = assignments.map(a => a.member_id); %>
+
+<form action="<%= route('admin.tasks.update', { id: task.id }) %>" method="POST" class="edit-form">
+  <%- csrf('PUT') %>
+
+  <div class="form-row">
+    <div class="form-group" style="flex:2">
+      <label><i class="bi bi-card-text"></i> Title</label>
+      <input type="text" name="title" value="<%= task.title %>" required/>
+    </div>
+    <div class="form-group">
+      <label><i class="bi bi-tag"></i> Type</label>
+      <select name="type">
+        <% ['chore','homework','behaviour','one-off','challenge'].forEach(t => { %>
+          <option value="<%= t %>" <%= task.type === t ? 'selected' : '' %>><%= t %></option>
+        <% }) %>
+      </select>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label><i class="bi bi-text-paragraph"></i> Description</label>
+    <textarea name="description" rows="2"><%= task.description || '' %></textarea>
+  </div>
+
+  <div class="form-row">
+    <div class="form-group form-check">
+      <label><i class="bi bi-star"></i> Points Value</label>
+      <input type="number" name="points_value" value="<%= task.points_value %>" min="1" max="1000"/>
+    </div>
+    <div class="form-group">
+      <label><i class="bi bi-shield-check"></i> Approval</label>
+      <label class="toggle-label form-check">
+        <input type="checkbox" name="requires_approval" <%= task.requires_approval ? 'checked' : '' %>/>
+        Requires parent approval
+      </label>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label><i class="bi bi-people"></i> Assign To</label>
+    <div class="assignment-tabs">
+      <% [['all','people-fill','Everyone'],['specific','person-check','Specific'],['rotating','arrow-repeat','Rotating']].forEach(([val,icon,label]) => { %>
+        <label class="assignment-tab">
+          <input type="radio" name="assignment_type" value="<%= val %>"
+                 <%= task.assignment_type === val ? 'checked' : '' %> onchange="toggleAssignment()"/>
+          <span><i class="bi bi-<%= icon %>"></i> <%= label %></span>
+        </label>
+      <% }) %>
+    </div>
+  </div>
+
+  <div id="member-picker" style="display:<%= task.assignment_type !== 'all' ? 'block' : 'none' %>" class="form-group">
+    <label>Select members</label>
+    <div class="member-checkboxes">
+      <% children.forEach(child => { %>
+        <label class="member-check">
+          <input type="checkbox" name="assigned_members" value="<%= child.id %>"
+                 <%= assignedIds.includes(child.id) ? 'checked' : '' %>/>
+          <span class="avatar avatar-sm" style="background:<%= child.avatar_color %>">
+            <%= child.name.charAt(0) %>
+          </span>
+          <%= child.name %>
+        </label>
+      <% }) %>
+    </div>
+    <small id="rotation-note" style="display:<%= task.assignment_type === 'rotating' ? 'block' : 'none' %>;color:#5b4fcf; margin-top:0.5rem">
+      <i class="bi bi-info-circle"></i> Order determines rotation sequence.
+    </small>
+  </div>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label><i class="bi bi-arrow-repeat"></i> Recurring</label>
+      <label class="toggle-label form-check">
+        <input type="checkbox" name="is_recurring" id="is_recurring"
+               <%= task.is_recurring ? 'checked' : '' %> onchange="toggleRecurrence()"/>
+        Repeats on a schedule
+      </label>
+    </div>
+    <div class="form-group" id="recurrence-field" style="display:<%= task.is_recurring ? 'block' : 'none' %>">
+      <label>Frequency</label>
+      <select name="recurrence">
+        <% ['daily','weekly','monthly'].forEach(r => { %>
+          <option value="<%= r %>" <%= task.recurrence === r ? 'selected' : '' %>><%= r %></option>
+        <% }) %>
+      </select>
+    </div>
+  </div>
+
+  <div class="action-bar">
+    <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Save Changes</button>
+    <a href="<%= route('admin.tasks.index') %>" class="btn btn-secondary">Cancel</a>
+  </div>
+</form>
+
+<style>
+.page-header      { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; }
+.page-header h2   { color:#1e1b4b; margin:0; }
+.form-row         { display:flex; gap:1rem; flex-wrap:wrap; }
+.form-row .form-group { flex:1; min-width:180px; }
+.toggle-label     { display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-size:0.9rem; padding-top:0.4rem; }
+.assignment-tabs  { display:flex; gap:0.6rem; flex-wrap:wrap; margin-top:0.3rem; }
+.assignment-tab   { cursor:pointer; }
+.assignment-tab input { display:none; }
+.assignment-tab span  { display:flex; align-items:center; gap:0.4rem; padding:0.5rem 1rem; border-radius:99px; border:2px solid #e0e0e0; font-size:0.85rem; font-weight:600; color:#888; transition:all 0.15s; }
+.assignment-tab input:checked + span { border-color:#5b4fcf; background:#f0eeff; color:#5b4fcf; }
+.member-checkboxes { display:flex; flex-wrap:wrap; gap:0.6rem; margin-top:0.5rem; }
+.member-check     { display:flex; align-items:center; gap:0.5rem; cursor:pointer; background:#f4f6fb; border-radius:99px; padding:0.4rem 0.8rem 0.4rem 0.4rem; font-size:0.85rem; border:2px solid transparent; transition:border-color 0.15s; }
+.member-check input { display:none; }
+.member-check:has(input:checked) { border-color:#5b4fcf; background:#f0eeff; }
+.avatar-sm        { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:0.75rem; font-weight:700; flex-shrink:0; }
+</style>
+
+<script>
+function toggleAssignment() {
+  const type = document.querySelector('[name="assignment_type"]:checked').value;
+  document.getElementById('member-picker').style.display  = type === 'all' ? 'none' : 'block';
+  document.getElementById('rotation-note').style.display  = type === 'rotating' ? 'block' : 'none';
+}
+
+function toggleRecurrence() {
+  document.getElementById('recurrence-field').style.display =
+    document.getElementById('is_recurring').checked ? 'block' : 'none';
+}
+</script>

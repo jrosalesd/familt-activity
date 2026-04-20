@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('./partials/head') %>
+<body>
+  <nav class="navbar">
+    <a href="/" class="navbar-brand"><i class="bi bi-house-heart-fill"></i> Family Tasks</a>
+    <div class="navbar-links">
+      <% if (member) { %>
+        <span class="nav-member">
+          <span class="avatar" style="--avatar-color: <%= member.avatar_color %>">
+            <%= member.name.charAt(0).toUpperCase() %>
+          </span>
+          <%= member.name %>
+          <% if (member.role === 'child') { %>
+            <span class="nav-points"><i class="bi bi-star-fill"></i> <%= member.points_balance %> pts</span>
+          <% } %>
+        </span>
+        <% if (member.role !== 'child') { %>
+          <a href="<%= route('app.admin.dashboard') %>"><i class="bi bi-shield-lock"></i> Admin</a>
+        <% } %>
+        <form action="<%= route('logout.kid') %>" method="POST" class="form-inline">
+          <%- csrf() %>
+          <button class="btn-nav-logout"><i class="bi bi-box-arrow-left"></i> Logout</button>
+        </form>
+      <% } %>
+    </div>
+  </nav>
+
+  <main class="container">
+    <% if (flash && flash.success) { %>
+      <div class="flash flash-success"><i class="bi bi-check-circle-fill"></i> <%= flash.success %></div>
+    <% } %>
+    <% if (flash && flash.error) { %>
+      <div class="flash flash-error"><i class="bi bi-exclamation-triangle-fill"></i> <%= flash.error %></div>
+    <% } %>
+    <%- body %>
+  </main>
+
+
+<%- include('./partials/foot') %>
+
+
+</body>
+</html>

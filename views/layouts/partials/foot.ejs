@@ -1,0 +1,9 @@
+<%# Global scripts — auto-loaded from /public/js/ %>
+<% (locals.getAssets('js') || []).forEach(file => { %>
+  <script src="/js/<%= file %>"></script>
+<% }) %>
+
+<%# Page-specific scripts — only on pages that request them %>
+<% (locals.pageScripts || []).forEach(name => { %>
+  <script src="/js/<%= name %>.js"></script>
+<% }) %>

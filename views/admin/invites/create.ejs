@@ -1,0 +1,23 @@
+<form action="<%= route('admin.invites.store') %>" method="POST" class="edit-form">
+  <div class="form-group">
+    <label><i class="bi bi-shield"></i> Inviting as</label>
+    <select name="role" required>
+      <option value="child">Child</option>
+      <option value="trusted_adult">Trusted Adult</option>
+      <option value="parent">Parent</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label><i class="bi bi-clock"></i> Valid for (days)</label>
+    <select name="days_valid">
+      <option value="1">1 day</option>
+      <option value="3">3 days</option>
+      <option value="7" selected>7 days</option>
+      <option value="30">30 days</option>
+    </select>
+  </div>
+  <div class="action-bar">
+    <button type="submit" class="btn btn-primary"><i class="bi bi-envelope-plus"></i> Create Invite</button>
+    <a href="<%= route('admin.invites.index') %>" class="btn btn-secondary">Cancel</a>
+  </div>
+</form>

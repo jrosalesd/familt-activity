@@ -1,0 +1,40 @@
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon"><i class="bi bi-check2-square"></i></div>
+    <div class="stat-value"><%= stats.totalTasks %></div>
+    <div class="stat-label">Pending Approvals</div>
+  </div>
+  <div class="stat-card stat-card--warning">
+    <div class="stat-icon"><i class="bi bi-star-fill"></i></div>
+    <div class="stat-value"><%= stats.totalRewards %></div>
+    <div class="stat-label">Points Awarded Today</div>
+  </div>
+  <div class="stat-card stat-card--info">
+    <div class="stat-icon"><i class="bi bi-people"></i></div>
+    <div class="stat-value"><%= stats.totalMembers %></div>
+    <div class="stat-label">Family Members</div>
+  </div>
+</div>
+
+<div class="family-link-card">
+  <h3><i class="bi bi-link-45deg"></i> Kids Login Link</h3>
+  <p>Share this link with your kids — they can bookmark it and go straight to their PIN pad.</p>
+  <div class="link-display">
+    <code id="kids-link"><%= kidsLink %></code>
+    <button class="btn btn-sm btn-secondary"
+            id="copy-kids-link"
+            data-copy-source="kids-link"
+            data-copy-button="copy-kids-link"
+            data-copy-message="Kids login link copied!">
+      <i class="bi bi-clipboard"></i> Copy
+    </button>
+  </div>
+</div>
+
+<style>
+.family-link-card { background: white; border-radius: 12px; padding: 1.5rem; margin-top: 1.5rem; box-shadow: 0 1px 4px rgba(0,0,0,0.07); }
+.family-link-card h3 { color: #1e1b4b; margin-bottom: 0.4rem; }
+.family-link-card p  { color: #888; font-size: 0.88rem; margin-bottom: 1rem; }
+.link-display { display: flex; align-items: center; gap: 1rem; background: #f4f6fb; padding: 0.8rem 1rem; border-radius: 8px; flex-wrap: wrap; }
+.link-display code { flex: 1; font-size: 0.85rem; color: #5b4fcf; word-break: break-all; min-width: 0; }
+</style>

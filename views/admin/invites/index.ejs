@@ -1,0 +1,48 @@
+<div class="page-header">
+  <h2><i class="bi bi-envelope-plus"></i> Invites</h2>
+  <a href="<%= route('admin.invites.create') %>" class="btn btn-outline-primary">
+    <i class="bi bi-plus-lg"></i> New Invite
+  </a>
+</div>
+
+<% if (invites.length === 0) { %>
+  <p class="empty-state"><i class="bi bi-inbox"></i> No invites yet.</p>
+<% } else { %>
+  <table class="data-table">
+    <thead>
+      <tr><th>Role</th><th>Created By</th><th>Status</th><th>Expires</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      <% invites.forEach(inv => { %>
+        <tr>
+          <td><span class="badge badge-<%= inv.role.replace('_','-') %>"><%= inv.role %></span></td>
+          <td><%= inv.created_by_name %></td>
+          <td>
+            <% if (inv.used_at) { %>
+              <span class="badge badge-approved"><i class="bi bi-check-circle"></i> Used by <%= inv.used_by_name %></span>
+            <% } else if (new Date(inv.expires_at) < new Date()) { %>
+              <span class="badge badge-rejected"><i class="bi bi-x-circle"></i> Expired</span>
+            <% } else { %>
+              <span class="badge badge-pending"><i class="bi bi-clock"></i> Pending</span>
+            <% } %>
+          </td>
+          <td><%= new Date(inv.expires_at).toLocaleDateString() %></td>
+          <td>
+            <% if (!inv.used_at) { %>
+              <button class="btn btn-sm btn-secondary"
+                data-copy="<%= `${process.env.APP_URL || ''}/join/${inv.code}` %>"
+                data-copy-message="Invite link copied!">
+                <i class="bi bi-clipboard"></i> Copy Link
+              </button>
+              <form action="<%= route('admin.invites.destroy', { id: inv.id }) %>" method="POST" style="display:inline"
+                    onsubmit="return confirm('Delete this invite?')">
+                <button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
+              </form>
+            <% } %>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+<% } %>
+

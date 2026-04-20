@@ -1,0 +1,12 @@
+<div class="dashboard-welcome">
+  <div class="welcome-avatar" style="--avatar-color: <%= member.avatar_color %>">
+    <%= member.name.charAt(0).toUpperCase() %>
+  </div>
+  <h1>Hi <%= member.name %>!</h1>
+  <div class="points-badge">
+    <i class="bi bi-star-fill"></i>
+    <span><%= member.points_balance %> points</span>
+  </div>
+  <p class="text-muted mt-1">Your dashboard is coming soon...</p>
+</div>
+

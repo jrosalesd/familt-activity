@@ -1,0 +1,90 @@
+<div class="page-header">
+  <h2><i class="bi bi-check2-square"></i> Tasks</h2>
+  <a href="<%= route('admin.tasks.create') %>" class="btn btn-outline-primary">
+    <i class="bi bi-plus-lg"></i> New Task
+  </a>
+</div>
+
+<% if (tasks.length === 0) { %>
+  <div class="empty-state">
+    <i class="bi bi-check2-square"></i>
+    <h3>No tasks yet</h3>
+    <p>Create your first task to get started.</p>
+    <a href="<%= route('admin.tasks.create') %>" class="btn btn-primary">
+      <i class="bi bi-plus-lg"></i> Create Task
+    </a>
+  </div>
+<% } else { %>
+  <div class="tasks-grid">
+    <% tasks.forEach(task => { %>
+      <div class="task-card">
+        <div class="task-card-header">
+          <span class="task-type-badge task-type--<%= task.type %>"><%= task.type %></span>
+          <span class="task-points"><i class="bi bi-star-fill"></i> <%= task.points_value %> pts</span>
+        </div>
+
+        <h3 class="task-title"><%= task.title %></h3>
+        <% if (task.description) { %>
+          <p class="task-desc"><%= task.description %></p>
+        <% } %>
+
+        <div class="task-meta">
+          <% if (task.assignment_type === 'all') { %>
+            <span class="meta-tag"><i class="bi bi-people"></i> Everyone</span>
+          <% } else if (task.assignments && task.assignments.length > 0) { %>
+            <span class="meta-tag">
+              <% task.assignments.forEach(a => { %>
+                <span class="mini-avatar" style="background:<%= a.avatar_color %>" title="<%= a.name %>">
+                  <%= a.name.charAt(0) %>
+                </span>
+              <% }) %>
+              <%= task.assignment_type === 'rotating' ? '(rotating)' : '' %>
+            </span>
+          <% } %>
+          <% if (task.is_recurring) { %>
+            <span class="meta-tag"><i class="bi bi-arrow-repeat"></i> <%= task.recurrence %></span>
+          <% } %>
+          <% if (task.requires_approval) { %>
+            <span class="meta-tag"><i class="bi bi-shield-check"></i> Needs approval</span>
+          <% } %>
+        </div>
+
+        <div class="task-card-actions">
+          <a href="<%= route('admin.tasks.edit', { id: task.id }) %>" class="btn btn-sm btn-secondary">
+            <i class="bi bi-pencil"></i> Edit
+          </a>
+          <form action="<%= route('admin.tasks.destroy', { id: task.id }) %>" method="POST"
+                onsubmit="event.preventDefault(); confirmDelete(this, '<%= task.title %>')">
+            <%- csrf('DELETE') %>
+            <button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
+          </form>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+<% } %>
+
+<style>
+.page-header       { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; }
+.page-header h2    { color:#1e1b4b; margin:0; }
+.tasks-grid        { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1.2rem; }
+.task-card         { background:white; border-radius:14px; padding:1.3rem; box-shadow:0 2px 8px rgba(0,0,0,0.07); display:flex; flex-direction:column; gap:0.7rem; }
+.task-card-header  { display:flex; align-items:center; justify-content:space-between; }
+.task-points       { font-weight:700; color:#f0a500; font-size:0.9rem; }
+.task-title        { margin:0; font-size:1rem; color:#1e1b4b; font-weight:700; }
+.task-desc         { margin:0; font-size:0.85rem; color:#888; }
+.task-meta         { display:flex; flex-wrap:wrap; gap:0.4rem; }
+.meta-tag          { display:flex; align-items:center; gap:0.3rem; background:#f4f6fb; border-radius:99px; padding:0.2rem 0.6rem; font-size:0.78rem; color:#555; }
+.mini-avatar       { width:20px; height:20px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; color:white; font-size:0.65rem; font-weight:700; }
+.task-card-actions { display:flex; gap:0.5rem; margin-top:auto; padding-top:0.5rem; border-top:1px solid #f0f0f0; }
+.task-type-badge   { font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; padding:0.2rem 0.6rem; border-radius:99px; }
+.task-type--chore     { background:#e8f4fd; color:#2980b9; }
+.task-type--homework  { background:#fef9e7; color:#f39c12; }
+.task-type--behaviour { background:#eafaf1; color:#27ae60; }
+.task-type--one-off   { background:#f9ebf9; color:#8e44ad; }
+.task-type--challenge { background:#fdebd0; color:#e67e22; }
+.empty-state       { text-align:center; padding:4rem 2rem; background:white; border-radius:14px; }
+.empty-state i     { font-size:3rem; color:#d0d5e8; display:block; margin-bottom:1rem; }
+.empty-state h3    { color:#1e1b4b; margin-bottom:0.5rem; }
+.empty-state p     { color:#888; margin-bottom:1.5rem; }
+</style>

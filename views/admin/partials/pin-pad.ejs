@@ -1,0 +1,71 @@
+<%#
+  Shared PIN pad partial
+  ─────────────────────
+  Variables expected from include():
+    displayId  — id for the dot display container
+    padId      — id for the pin-pad div
+    hintId     — id for the hint <small>
+    okId       — id for the ok button
+    valueId    — name/id for the hidden pin value input
+    lengthId   — name/id for the hidden pin_length input
+    context    — 'child' or 'parent' (drives JS context)
+    pinLength  — current pin length (number)
+    hint       — hint text string
+%>
+
+<%# Length selector %>
+<div class="pin-length-selector">
+  <span class="pin-length-label">PIN length:</span>
+  <div class="pin-length-options">
+    <% [4,5,6,7,8].forEach(n => { %>
+      <button type="button"
+        class="pin-length-btn <%= pinLength == n ? 'active' : '' %>"
+        data-length="<%= n %>"
+        data-context="<%= context %>"
+        onclick="setAdminPinLength(<%= n %>, '<%= context %>')">
+        <%= n %>
+      </button>
+    <% }) %>
+  </div>
+</div>
+
+<%# Dynamic dot display %>
+<div class="pin-display" id="<%= displayId %>"
+     style="justify-content:flex-start;gap:0.5rem;margin:0.75rem 0"></div>
+
+<%# PIN pad %>
+<div class="pin-pad" id="<%= padId %>" style="max-width:240px">
+  <% [1,2,3,4,5,6,7,8,9].forEach(n => { %>
+    <button type="button" class="pin-btn"
+            onclick="addAdminPin('<%= n %>', '<%= context %>')">
+      <%= n %>
+    </button>
+  <% }) %>
+  <button type="button" class="pin-btn pin-btn-clear"
+          onclick="clearAdminPin('<%= context %>')">
+    <i class="bi bi-arrow-left"></i>
+  </button>
+  <button type="button" class="pin-btn"
+          onclick="addAdminPin('0', '<%= context %>')">
+    0
+  </button>
+  <button type="button" class="pin-btn pin-btn-ok"
+          id="<%= okId %>" style="opacity:0.4" disabled>
+    <i class="bi bi-check-lg"></i>
+  </button>
+</div>
+
+<small id="<%= hintId %>"><%= hint %></small>
+
+<%# Hidden fields submitted with the form %>
+<input type="hidden" name="pin"        id="<%= valueId %>"/>
+<input type="hidden" name="pin_length" id="<%= lengthId %>" value="<%= pinLength %>"/>
+
+<%# Shared PIN length/length CSS %>
+<style>
+.pin-length-selector { display:flex; align-items:center; gap:0.75rem; margin-bottom:0.5rem; }
+.pin-length-label    { font-size:0.85rem; color:#888; white-space:nowrap; }
+.pin-length-options  { display:flex; gap:0.4rem; }
+.pin-length-btn      { width:34px; height:34px; border-radius:8px; border:2px solid #ddd; background:#f4f6fb; font-weight:700; font-size:0.85rem; cursor:pointer; transition:all 0.15s; }
+.pin-length-btn.active { background:var(--primary,#5b4fcf); border-color:var(--primary,#5b4fcf); color:white; }
+</style>

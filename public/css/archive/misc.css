@@ -1,0 +1,33 @@
+.clipboard-toast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(1rem);
+  background: #1e1b4b;
+  color: white;
+  padding: 0.7rem 1.4rem;
+  border-radius: 99px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 9999;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.clipboard-toast--visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+@media (max-width: 600px) {
+  .login-options {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .two-doors {
+    grid-template-columns: 1fr;
+  }
+}

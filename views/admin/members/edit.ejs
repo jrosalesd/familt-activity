@@ -1,0 +1,210 @@
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:start">
+
+  <%# Edit member form %>
+  <form action="<%= route('admin.members.update', { id: member.id }) %>" method="POST" class="edit-form">
+    <%- csrf('PUT') %>
+
+    <%# Member header %>
+    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem">
+      <div class="avatar" style="--avatar-color:<%= member.avatar_color %>;width:50px;height:50px;font-size:1.4rem">
+        <%= member.name.charAt(0).toUpperCase() %>
+      </div>
+      <div>
+        <strong><%= member.name %></strong>
+        <div style="font-size:0.8rem;color:#888"><%= member.role %></div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Name</label>
+      <input type="text" name="name" value="<%= member.name %>" required/>
+    </div>
+
+    <div class="form-group">
+      <label><i class="bi bi-shield"></i> Role</label>
+      <select name="role" id="role-select">
+        <% roles.forEach(r => { %>
+          <option value="<%= r.value %>"
+                  data-uses-pin="<%= r.uses_pin %>"
+                  <%= member.role === r.value ? 'selected' : '' %>>
+            <%= r.label %>
+          </option>
+        <% }) %>
+      </select>
+      <small id="role-hint" style="color:#888"></small>
+    </div>
+
+    <%#
+      ── PIN PAD MACRO ──────────────────────────────────────────────────────
+      Rendered once as a hidden template, cloned by JS for each context.
+      pinPadConfig is set just before each include.
+    %>
+
+    <%# Children: required PIN %>
+    <div id="pin-fields" style="display:none">
+      <div class="form-group">
+        <label><i class="bi bi-lock"></i> New PIN
+          <small style="display:inline">(leave blank to keep current)</small>
+        </label>
+        <%- include('../partials/pin-pad', {
+          displayId:  'child-pin-display',
+          padId:      'child-pin-pad',
+          hintId:     'child-pin-hint',
+          okId:       'child-pin-ok',
+          valueId:    'child-pin-value',
+          lengthId:   'child-pin-length',
+          context:    'child',
+          pinLength:  member.pin_length || 4,
+          hint:       'Enter a ' + (member.pin_length || 4) + '-digit PIN to change it',
+        }) %>
+      </div>
+    </div>
+
+    <%# Parents: email + password + optional Quick Access PIN %>
+    <div id="password-fields" style="display:none">
+      <div class="form-group">
+        <label><i class="bi bi-envelope"></i> Email</label>
+        <input type="email" name="email" value="<%= member.email || '' %>"/>
+      </div>
+      <div class="form-group">
+        <label><i class="bi bi-key"></i> New Password
+          <small style="display:inline">(leave blank to keep current)</small>
+        </label>
+        <div class="input-with-toggle">
+          <input type="password" name="password" id="password-field" placeholder="New password"/>
+          <button type="button" class="toggle-password">
+            <i class="bi bi-eye" id="toggle-icon"></i>
+          </button>
+        </div>
+      </div>
+
+      <%# Quick Access PIN toggle %>
+      <div class="form-group">
+        <button type="button" class="btn-qa-toggle" id="qa-toggle-btn"
+                onclick="toggleQuickAccessPin()">
+          <i class="bi bi-shield-lock"></i>
+          <%= member.pin_hash ? 'Change Quick Access PIN' : 'Add Quick Access PIN' %>
+        </button>
+        <% if (member.pin_hash) { %>
+          <small style="color:var(--success)">
+            <i class="bi bi-check-circle"></i> Quick Access PIN is set
+          </small>
+        <% } %>
+      </div>
+
+      <div id="qa-pin-section" style="display:none">
+        <div class="form-group">
+          <label><i class="bi bi-shield-lock"></i> Quick Access PIN
+            <small style="display:inline">(4–8 digits, used on kids screen)</small>
+          </label>
+          <%- include('../partials/pin-pad', {
+            displayId:  'parent-pin-display',
+            padId:      'parent-pin-pad',
+            hintId:     'parent-pin-hint',
+            okId:       'parent-pin-ok',
+            valueId:    'parent-pin-value',
+            lengthId:   'parent-pin-length',
+            context:    'parent',
+            pinLength:  member.pin_length || 4,
+            hint:       'Enter a ' + (member.pin_length || 4) + '-digit PIN',
+          }) %>
+
+          <% if (member.pin_hash) { %>
+            <div class="form-check" style="margin-top:0.75rem">
+              <input type="checkbox" name="remove_pin" id="remove_pin" value="1"/>
+              <label for="remove_pin" style="color:var(--danger)">
+                <i class="bi bi-trash"></i> Remove Quick Access PIN
+              </label>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label><i class="bi bi-palette"></i> Avatar Colour</label>
+      <div class="color-picker">
+        <% ['#e74c3c','#e67e22','#f1c40f','#2ecc71','#1abc9c','#3498db','#9b59b6','#e91e63','#5b4fcf','#1e1b4b'].forEach(color => { %>
+          <label class="color-swatch">
+            <input type="radio" name="avatar_color" value="<%= color %>"
+                   <%= member.avatar_color === color ? 'checked' : '' %>/>
+            <span style="background:<%= color %>"></span>
+          </label>
+        <% }) %>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="toggle-label form-check">
+        <input type="checkbox" id="is_temporary" name="is_temporary"
+          <%= member.is_temporary ? 'checked' : '' %>/>
+        Temporary member
+      </label>
+    </div>
+
+    <div id="expiry-field"
+         style="display:<%= member.is_temporary ? 'block' : 'none' %>"
+         class="form-group">
+      <label><i class="bi bi-calendar"></i> Expires On</label>
+      <input type="date" name="expires_at"
+             value="<%= member.expires_at ? new Date(member.expires_at).toISOString().split('T')[0] : '' %>"/>
+    </div>
+
+    <div class="action-bar">
+      <button type="submit" class="btn btn-primary">
+        <i class="bi bi-save"></i> Save Changes
+      </button>
+      <a href="<%= route('admin.members.index') %>" class="btn btn-secondary">Cancel</a>
+    </div>
+  </form>
+
+  <%# Adjust points — only for roles that use PIN (children) %>
+  <%
+    const memberRole    = roles.find(r => r.value === member.role);
+    const memberUsesPin = memberRole?.uses_pin || false;
+  %>
+  <% if (memberUsesPin) { %>
+    <div class="edit-form">
+      <h3 style="margin-bottom:1.2rem;color:#1e1b4b">
+        <i class="bi bi-star"></i> Adjust Points
+      </h3>
+      <div class="points-current">
+        <span class="points-big"><%= member.points_balance %></span>
+        <span>current balance</span>
+      </div>
+      <form action="<%= route('admin.members.adjust-points', { id: member.id }) %>" method="POST">
+        <%- csrf() %>
+        <div class="form-group">
+          <label>Points (use negative to deduct)</label>
+          <input type="number" name="points" placeholder="e.g. 50 or -20" required/>
+        </div>
+        <div class="form-group">
+          <label>Reason</label>
+          <input type="text" name="reason" placeholder="e.g. Bonus for good behaviour"/>
+        </div>
+        <button type="submit" class="btn btn-success btn-block">
+          <i class="bi bi-plus-circle"></i> Apply Points
+        </button>
+      </form>
+    </div>
+  <% } %>
+
+</div>
+
+<style>
+.color-picker        { display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.3rem; }
+.color-swatch input  { display:none; }
+.color-swatch span   { display:block; width:32px; height:32px; border-radius:50%; cursor:pointer; border:3px solid transparent; transition:border-color 0.15s; }
+.color-swatch input:checked + span { border-color:#1e1b4b; }
+.points-current      { text-align:center; margin-bottom:1.2rem; }
+.points-big          { display:block; font-size:3rem; font-weight:800; color:#f0a500; line-height:1; }
+.input-with-toggle   { position:relative; }
+.input-with-toggle input { padding-right:3rem; width:100%; }
+.toggle-password     { position:absolute; right:0.75rem; top:50%; transform:translateY(-50%); background:none; border:none; color:#888; cursor:pointer; font-size:1rem; padding:0; }
+.toggle-password:hover { color:#1e1b4b; }
+.btn-qa-toggle       { background:#f0eef8; border:2px dashed #9b8ecf; border-radius:10px; padding:0.6rem 1rem; color:#5b4fcf; font-weight:600; font-size:0.88rem; cursor:pointer; transition:all 0.15s; width:100%; text-align:left; }
+.btn-qa-toggle:hover { background:#e5e0f5; border-color:#5b4fcf; }
+small                { color:#888; font-size:0.8rem; display:block; margin-top:0.3rem; }
+</style>
+
+<script>const rolesData = <%- JSON.stringify(roles) %>;</script>

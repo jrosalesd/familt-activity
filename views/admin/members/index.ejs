@@ -1,0 +1,177 @@
+<div class="page-header">
+  <h2><i class="bi bi-people"></i> Family Members</h2>
+  <a href="<%= route('admin.members.create') %>" class="btn btn-outline-primary">
+    <i class="bi bi-person-plus"></i> Add Member
+  </a>
+</div>
+
+<%# Adults %>
+  <h3 class="section-title"><i class="bi bi-shield-check"></i> Parents & Adults</h3>
+  <% if (adults.length===0) { %>
+    <p class="empty-state">No adults yet.</p>
+    <% } else { %>
+      <table class="data-table" style="margin-bottom:2rem">
+        <thead>
+          <tr>
+            <th>Member</th>
+            <th>Role</th>
+            <th>Email</th>
+            <th>Type</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% adults.forEach(m=> { %>
+            <tr>
+              <td>
+                <div style="display:flex;align-items:center;gap:0.6rem">
+                  <span class="avatar" style="background:<%= m.avatar_color %>">
+                    <%= m.name.charAt(0).toUpperCase() %>
+                  </span>
+                  <strong>
+                    <%= m.name %>
+                  </strong>
+                </div>
+              </td>
+              <td><span class="badge badge-<%= m.role.toLowerCase().replace('_','-') %>">
+                  <%= m.role %>
+                </span></td>
+
+              <td>
+                <%= m.email || '—' %>
+              </td>
+              <td>
+                <% if (m.is_temporary) { %>
+                  <span class="badge badge-pending"><i class="bi bi-clock"></i> Temporary</span>
+                  <% } else { %>
+                    <span class="badge badge-approved">Permanent</span>
+                    <% } %>
+              </td>
+              <td>
+                <div class="d-inline-flex gap-1 align-items-center">
+                  <a href="<%= route('admin.members.edit', { id: m.id }) %>" class="btn btn-sm btn-warning">
+                    <i class="bi bi-pencil"></i>
+                  </a>
+                  <% if (m.id !==member.id) { %>
+                    <form action="<%= route('admin.members.destroy', { id: m.id }) %>?_method=DELETE" method="POST"
+                      style="display:inline" onsubmit="event.preventDefault(); confirmDelete(this, '<%= m.name %>')"
+                      class="d-inline m-0">
+                      <button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
+                    </form>
+                    <% } %>
+                </div>
+
+              </td>
+            </tr>
+            <% }) %>
+        </tbody>
+      </table>
+      <% } %>
+
+        <%# Children %>
+          <h3 class="section-title"><i class="bi bi-emoji-smile"></i> Children</h3>
+          <% if (children.length===0) { %>
+            <p class="empty-state">No children yet.</p>
+            <% } else { %>
+              <div class="children-grid">
+                <% children.forEach(m=> { %>
+                  <div class="child-card">
+                    <div class="child-avatar" style="background:<%= m.avatar_color %>">
+                      <%= m.name.charAt(0).toUpperCase() %>
+                    </div>
+                    <div class="child-info">
+                      <strong>
+                        <%= m.name %>
+                      </strong>
+                      <div class="child-points">
+                        <i class="bi bi-star-fill"></i>
+                        <%= m.points_balance %> pts
+                      </div>
+                      <% if (m.is_temporary) { %>
+                        <div class="child-temp"><i class="bi bi-clock"></i> Temporary</div>
+                        <% } %>
+                    </div>
+                    <div class="child-actions">
+                      <a href="<%= route('admin.members.show', { id: m.id }) %>"class="btn btn-sm btn-primary">
+                        <i class="bi bi-eye"></i>
+                      </a>
+                      <a href="<%= route('admin.members.edit', { id: m.id }) %>" class="btn btn-sm btn-warning">
+                        <i class="bi bi-pencil"></i>
+                      </a>
+                      <form action="<%= route('admin.members.destroy', { id: m.id }) %>" method="POST"
+                        style="display:inline" onsubmit="event.preventDefault(); confirmDelete(this, '<%= m.name %>')">
+                        <%- csrf('Delete') %>
+                          <button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
+                      </form>
+                    </div>
+                  </div>
+                  <% }) %>
+              </div>
+              <% } %>
+
+                <style>
+                  .section-title {
+                    font-size: 1rem;
+                    color: #1e1b4b;
+                    margin: 1.5rem 0 0.8rem;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                    font-weight: 700;
+                  }
+
+                  .children-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+                    gap: 1rem;
+                  }
+
+                  .child-card {
+                    background: white;
+                    border-radius: 12px;
+                    padding: 1.2rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+                  }
+
+                  .child-avatar {
+                    width: 50px;
+                    height: 50px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    font-size: 1.4rem;
+                    font-weight: 700;
+                    flex-shrink: 0;
+                  }
+
+                  .child-info {
+                    flex: 1;
+                  }
+
+                  .child-info strong {
+                    display: block;
+                    margin-bottom: 0.2rem;
+                  }
+
+                  .child-points {
+                    font-size: 0.85rem;
+                    color: #f0a500;
+                    font-weight: 600;
+                  }
+
+                  .child-temp {
+                    font-size: 0.78rem;
+                    color: #888;
+                    margin-top: 0.2rem;
+                  }
+
+                  .child-actions {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.4rem;
+                  }
+                </style>

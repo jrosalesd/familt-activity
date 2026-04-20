@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+<%- include('./partials/head') %>
+
+<body class="admin-body">
+  <div class="admin-wrapper">
+    <aside class="admin-sidebar">
+      <div class="sidebar-brand"><i class="bi bi-house-heart-fill"></i> Family Tasks</div>
+      <% if (family) { %>
+        <div class="sidebar-family"><%= family.name %></div>
+      <% } %>
+      <nav class="sidebar-nav">
+        <a href="<%= route('app.admin.dashboard') %>"
+           class="<%= currentPath.includes('dashboard') ? 'active' : '' %>">
+          <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+        <a href="<%= safeRoute('admin.tasks.index') %>"
+           class="<%= currentPath.includes('tasks') ? 'active' : '' %>">
+          <i class="bi bi-check2-square"></i> Tasks
+        </a>
+        <a href="<%= safeRoute('admin.members.index') %>"
+           class="<%= currentPath.includes('members') ? 'active' : '' %>">
+          <i class="bi bi-people"></i> Members
+        </a>
+        <a href="<%= safeRoute('admin.rewards.index') %>"
+           class="<%= currentPath.includes('rewards') ? 'active' : '' %>">
+          <i class="bi bi-gift"></i> Rewards
+        </a>
+        <a href="<%= safeRoute('admin.approvals.index') %>"
+           class="<%= currentPath.includes('approvals') ? 'active' : '' %>">
+          <i class="bi bi-hand-thumbs-up"></i> Approvals
+        </a>
+        <a href="<%= route('admin.invites.index') %>"
+           class="<%= currentPath.includes('invites') ? 'active' : '' %>">
+          <i class="bi bi-envelope-plus"></i> Invites
+        </a>
+        <hr/>
+        <a href="<%= route('app.dashboard') %>">
+          <i class="bi bi-grid"></i> Family View
+        </a>
+        <form action="<%= route('logout') %>" method="POST" style="margin:0">
+          <%- csrf() %>
+          <button type="submit" class="sidebar-logout">
+            <i class="bi bi-box-arrow-left"></i> Logout
+          </button>
+        </form>
+      </nav>
+      <% if (member) { %>
+        <div class="sidebar-user">
+          <span class="avatar" style="--avatar-color:<%= member.avatar_color %>">
+            <%= member.name.charAt(0).toUpperCase() %>
+          </span>
+          <%= member.name %>
+        </div>
+      <% } %>
+    </aside>
+
+    <div class="admin-content">
+
+      <header class="admin-header"><h1><%= title %></h1></header>
+      
+      <div class="admin-main">
+        <% if (flash && flash.success) { %>
+          <div class="flash flash-success">
+            <i class="bi bi-check-circle-fill"></i> <%= flash.success %>
+          </div>
+        <% } %>
+        <% if (flash && flash.error) { %>
+          <div class="flash flash-error">
+            <i class="bi bi-exclamation-triangle-fill"></i> <%= flash.error %>
+          </div>
+        <% } %>
+        <%- body %>
+
+      </div>
+    </div>
+  </div>
+
+  <%# Confirm delete modal %>
+  <div id="confirm-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center">
+    <div style="background:white;border-radius:16px;padding:2rem;max-width:380px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.2)">
+      <h3 id="confirm-title" style="margin-bottom:0.5rem;color:#1e1b4b"></h3>
+      <p id="confirm-message" style="color:#888;margin-bottom:1.5rem;font-size:0.9rem"></p>
+      <div style="display:flex;gap:1rem;justify-content:flex-end">
+        <button onclick="closeConfirm()" class="btn btn-secondary">
+          <i class="bi bi-x-lg"></i> Cancel
+        </button>
+        <button id="confirm-ok" class="btn btn-danger">
+          <i class="bi bi-trash"></i> Remove
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <%- include('./partials/foot') %>
+</body>
+</html>

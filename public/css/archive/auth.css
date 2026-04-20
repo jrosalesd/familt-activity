@@ -1,0 +1,95 @@
+.login-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.login-hero {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.login-hero i {
+    font-size: 3.5rem;
+    color: var(--primary);
+}
+
+.login-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.login-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.8rem;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.family-login-page {
+    max-width: 700px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 2rem 1rem;
+}
+
+.members-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+.member-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.2rem;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+}
+
+.member-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* PIN specific */
+.pin-display {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.pin-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid #ddd;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.pin-dot.filled {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.pin-pad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+}
+
+.pin-btn {
+    padding: 1rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+    background: #f0f0f0;
+    cursor: pointer;
+    transition: background 0.1s;
+}

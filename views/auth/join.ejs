@@ -1,0 +1,56 @@
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-header">
+      <i class="bi bi-people-fill"></i>
+      <h1>You're Invited!</h1>
+      <p>Join <strong><%= invite.family_name %></strong> on Family Tasks</p>
+      <span class="role-badge role-badge-<%= invite.role %>">
+        <i class="bi bi-<%= invite.role === 'child' ? 'emoji-smile' : 'shield-check' %>"></i>
+        Joining as <%= invite.role.replace('_', ' ') %>
+      </span>
+    </div>
+
+    <form action="/join/<%= invite.code %>" method="POST">
+        <%- csrf() %>
+      <div class="form-group">
+        <label><i class="bi bi-person"></i> Your Name</label>
+        <input type="text" name="name" required placeholder="e.g. Alice"/>
+      </div>
+
+      <div class="form-group">
+        <label><i class="bi bi-palette"></i> Pick a Colour</label>
+        <div class="color-picker">
+          <% ['#e74c3c','#e67e22','#f1c40f','#2ecc71','#1abc9c','#3498db','#9b59b6','#e91e63','#5b4fcf','#1e1b4b'].forEach((color, i) => { %>
+            <label class="color-swatch">
+              <input type="radio" name="avatar_color" value="<%= color %>" <%= i === 5 ? 'checked' : '' %>/>
+              <span style="--swatch-color: <%= color %>"></span>
+            </label>
+          <% }) %>
+        </div>
+      </div>
+
+      <% if (invite.role === 'child') { %>
+        <div class="form-group">
+          <label><i class="bi bi-lock"></i> Choose a 4-Digit PIN</label>
+          <input type="text" name="pin" maxlength="4" pattern="[0-9]{4}"
+                 inputmode="numeric" placeholder="e.g. 1234" required/>
+          <small>You'll use this to log in every day</small>
+        </div>
+      <% } else { %>
+        <div class="form-group">
+          <label><i class="bi bi-envelope"></i> Email</label>
+          <input type="email" name="email" required placeholder="your@email.com"/>
+        </div>
+        <div class="form-group">
+          <label><i class="bi bi-key"></i> Choose a Password</label>
+          <input type="password" name="password" required minlength="8" placeholder="Min 8 characters"/>
+        </div>
+      <% } %>
+
+      <button type="submit" class="btn btn-primary btn-block">
+        <i class="bi bi-house-heart"></i> Join <%= invite.family_name %>
+      </button>
+    </form>
+  </div>
+</div>
+

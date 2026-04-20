@@ -1,0 +1,46 @@
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-header">
+      <i class="bi bi-box-arrow-in-right"></i>
+      <h1>Welcome Back</h1>
+      <p>Login to your family account</p>
+    </div>
+
+    <form action=" <%= route('login') %> " method="POST">
+      <%- csrf() %>
+      <div class="form-group">
+        <label><i class="bi bi-envelope"></i> Email</label>
+        <input type="email" name="email" required autofocus placeholder="your@email.com"/>
+      </div>
+      <div class="form-group">
+        <label><i class="bi bi-lock"></i> Password</label>
+        <input type="password" name="password" required placeholder="Your password"/>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">
+        <i class="bi bi-box-arrow-in-right"></i> Login
+      </button>
+    </form>
+
+    <div class="auth-divider">or</div>
+
+    <a href="/login/kids" class="btn btn-secondary btn-block">
+      <i class="bi bi-emoji-smile"></i> I'm a Kid
+    </a>
+
+    <p class="auth-footer">No account yet? <a href="/register">Create your family</a></p>
+  </div>
+</div>
+
+<style>
+.auth-page    { max-width: 420px; margin: 2rem auto; padding: 0 1rem; }
+.auth-card    { background: white; border-radius: 16px; padding: 2.5rem; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+.auth-header  { text-align: center; margin-bottom: 2rem; }
+.auth-header i  { font-size: 2.5rem; color: var(--primary); }
+.auth-header h1 { font-size: 1.6rem; color: var(--primary); margin: 0.5rem 0 0.3rem; }
+.auth-header p  { color: var(--muted); font-size: 0.9rem; }
+.auth-divider { text-align: center; color: var(--muted); font-size: 0.85rem; margin: 1.2rem 0; position: relative; }
+.auth-divider::before, .auth-divider::after { content:''; position:absolute; top:50%; width:44%; height:1px; background:#eee; }
+.auth-divider::before { left:0; } .auth-divider::after { right:0; }
+.auth-footer  { text-align: center; margin-top: 1.5rem; font-size: 0.88rem; color: var(--muted); }
+.auth-footer a { color: var(--primary); font-weight: 600; }
+</style>
