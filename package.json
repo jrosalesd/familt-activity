@@ -1,0 +1,42 @@
+{
+  "name": "home_management_site",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "migrate": "node database/migrate.js",
+    "migrate:rollback": "node database/migrate.js --rollback",
+    "migrate:status": "node database/migrate.js --status",
+    "migrate:fresh": "node database/migrate.js --fresh",
+    "make:controller": "node cli/make.js controller",
+    "make:model": "node cli/make.js model",
+    "make:migration": "node cli/make.js migration",
+    "make:middleware": "node cli/make.js middleware",
+    "make:all": "node cli/make.js all",
+    "make:views": "node cli/make.js views",
+    "db:seed": "node database/seed.js",
+    "build": "node scripts/BuildAssets.js && node scripts/BuildStyles.js",
+    "watch-js": "nodemon --watch public/js -e js --exec \"npm run build\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "connect-pg-simple": "^10.0.0",
+    "dotenv": "^17.3.1",
+    "ejs": "^5.0.1",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "method-override": "^3.0.0",
+    "pg": "^8.20.0"
+  },
+  "devDependencies": {
+    "clean-css": "^5.3.3",
+    "nodemon": "^3.1.14",
+    "uglify-js": "^3.19.3"
+  }
+}
